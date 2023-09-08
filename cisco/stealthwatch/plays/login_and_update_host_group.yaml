@@ -50,14 +50,14 @@
         xsrf_token:  "{{  login.cookies['XSRF-TOKEN']  }}"
         cookie:  "{{ login.cookies['stealthwatch.jwt']  }}"
 
-    - name: Update Bad Hosts Group
+    - name: Update AWS Hosts Group
       ansible.builtin.uri:
         url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/311/tags/50121'
         method: PUT
         validate_certs: false
         body:
           id: 50121
-          name: 'Bad Hosts'
+          name: 'All AWS'
           location: OUTSIDE
           ranges: "{{  all_aws_ips }}"
           # description: 'A sample of a threat feed'
