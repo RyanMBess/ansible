@@ -15,8 +15,8 @@
         method: POST
         validate_certs: false
         body:
-          username: admin
-          password: C1sco12345!
+          username: "{{  sw_admin  }}"
+          password: "{{ sw_password  }}"
         body_format: form-urlencoded
         headers:
           Content-Type: application/x-www-form-urlencoded        
