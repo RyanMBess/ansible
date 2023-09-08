@@ -1,0 +1,30 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+  vars:
+    cookies: {
+        "XSRF-TOKEN": "5643f7d6-f0f6-47d2-9a3d-36da5a97d9b0",
+        "stealthwatch.jwt": "eyJhbGciOiJSUzUxMiJ9.eyJyb2xlcyI6W3sibmFtZSI6IkFsbCBEYXRhIChSZWFkICYgV3JpdGUpIiwic291cmNlIjoiRGF0YSJ9LHsibmFtZSI6IkFsbCIsInNvdXJjZSI6IkZ1bmN0aW9uIn0seyJuYW1lIjoiTWFzdGVyIEFkbWluIiwic291cmNlIjoiV2ViRnVuY3Rpb24ifSx7Im5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJzb3VyY2UiOiJJbnRlcm5hbCJ9LHsibmFtZSI6IlNNQyBNYW5hZ2VyIiwic291cmNlIjoiSW50ZXJuYWwifV0sInN1YklkIjoiYWRtaW4iLCJyZW5ld2FibGUiOnRydWUsIlhTUkYtVE9LRU4iOiI1NjQzZjdkNi1mMGY2LTQ3ZDItOWEzZC0zNmRhNWE5N2Q5YjAiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY5NDA5MzA0NSwiZXhwX2Rpc3BsYXkiOiIyMDIzLTA5LTA3VDEzOjI0OjA1WiIsImF1dGhvcml6ZWRfYXQiOiIyMDIzLTA5LTA3VDEzOjA0OjA1WiIsInN3X3Nlc3Npb25fdmFsaWRfdW50aWwiOiIyMDIzLTA5LTA4VDAxOjA0OjA1WiJ9.EX04IpF3TrJynTjwupwyIGtFnNEIrNJx7x8vx412mtujDYLh1iEXSqqI1MBpj9bhI3d2ITKfI9zQa14BtKF7nz10xggazoTGb7NtgLWf-frjY71NOQC45L3otyQSq1o2xLkM3_n2c10B44bmj3ktZ8UybY6hIVc3WDw2bKeH46rGR49B-axp64MNXN8043TVPWPsQk3ZGkYeFO114paGtGdRKPqPt1QPawGHV-hrsAAbQMkA34YpyFh-xEdKRnEbH5_v6ijELoLc-lX4tUpcbiUi-WX-6AKX_KZO5zfdyndetjA9GD4WzPZ3gsR432Ghf3jduwOdhkiNzmWs7Gbgiw"
+    }
+#https://stackoverflow.com/questions/53191929/ansible-convert-dictionary-into-a-name-value-string
+  tasks:
+    - name:  print vars
+      ansible.builtin.debug:
+        var: cookies | to_json
+    
+    - name: dict to list
+      ansible.builtin.set_fact:
+        list_cookies: "{{  cookies | dict2items  }}"
+
+    - name: print data
+      ansible.builtin.debug:
+        var: list_cookies | type_debug
+    
+    - name: list to string
+      ansible.builtin.set_fact:
+        string_cookies: "{{  list_cookies | join (',')  }}"
+
+    - name: print string
+      ansible.builtin.debug:
+        var: string_cookies | type_debug

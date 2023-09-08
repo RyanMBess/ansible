@@ -1,0 +1,22 @@
+curl -k --location 'https://10.10.20.60/smc-configuration/rest/v1/tenants/301/tags/' \
+--header 'Cookie: XSRF-TOKEN=e1b4497c-4f8b-43b2-ada5-8f73957f7b38' \
+--header 'Content-Type: application/json' \
+--data '[
+    {
+        "name": "Ryan1",
+        "location": "OUTSIDE",
+        "description": "A sample of a threat feed",
+        "ranges": [
+            "149.202.170.60",
+            "23.129.64.101",
+            "37.187.129.166",
+            "91.146.121.3"
+        ],
+        "hostBaselines": false,
+        "suppressExcludedServices": true,
+        "inverseSuppression": false,
+        "hostTrap": false,
+        "sendToCta": false,
+        "parentId": 0
+    }
+]'

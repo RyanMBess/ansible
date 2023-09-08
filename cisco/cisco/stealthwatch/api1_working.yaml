@@ -1,0 +1,36 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+ 
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/token/v2/authenticate"
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        method: POST
+        validate_certs: false
+        body:
+          username: admin
+          password: C1sco12345!
+        body_format: form-urlencoded
+        headers:
+          Content-Type: application/x-www-form-urlencoded        
+      register: login
+
+    - name: token
+      ansible.builtin.debug:
+        var: login.cookies_string
+      
+    - name: data
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/sw-reporting/v1/tenants'
+        validate_certs: false
+        method: GET
+        headers:
+          Cookie:  "{{ login.cookies_string }}"
+        follow_redirects: safe
+        return_content: true
+      register: result

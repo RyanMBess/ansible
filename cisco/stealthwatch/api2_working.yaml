@@ -1,0 +1,23 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+ 
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/sw-reporting/v1/tenants"
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        validate_certs: false
+        method: GET
+        headers:
+          Cookie: 'XSRF-TOKEN=d3d057ae-2fe5-49bd-b6a5-356ba7979880; stealthwatch.jwt=eyJhbGciOiJSUzUxMiJ9.eyJyb2xlcyI6W3sibmFtZSI6IkFsbCBEYXRhIChSZWFkICYgV3JpdGUpIiwic291cmNlIjoiRGF0YSJ9LHsibmFtZSI6IkFsbCIsInNvdXJjZSI6IkZ1bmN0aW9uIn0seyJuYW1lIjoiTWFzdGVyIEFkbWluIiwic291cmNlIjoiV2ViRnVuY3Rpb24ifSx7Im5hbWUiOiJNYXN0ZXIgQWRtaW4iLCJzb3VyY2UiOiJJbnRlcm5hbCJ9LHsibmFtZSI6IlNNQyBNYW5hZ2VyIiwic291cmNlIjoiSW50ZXJuYWwifV0sInN1YklkIjoiYWRtaW4iLCJyZW5ld2FibGUiOnRydWUsIlhTUkYtVE9LRU4iOiJkM2QwNTdhZS0yZmU1LTQ5YmQtYjZhNS0zNTZiYTc5Nzk4ODAiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY5NDA5MjA0MiwiZXhwX2Rpc3BsYXkiOiIyMDIzLTA5LTA3VDEzOjA3OjIyWiIsImF1dGhvcml6ZWRfYXQiOiIyMDIzLTA5LTA3VDEyOjQ3OjIyWiIsInN3X3Nlc3Npb25fdmFsaWRfdW50aWwiOiIyMDIzLTA5LTA4VDAwOjQ3OjIyWiJ9.iEfF5fyQUyEl6xBI_zS7EKiGw6FwWHjJh1p5Nw-lye-88Swj7YOyeBaOki669mncySS6gcGaClsQaHhYSjQk5ka_FxcmZKd-KdMsI4IuWUybNJ2B34_H-T5RN61npQejw2F4Z3KI5P3J3uMxUuoEUw9Ntf1lksMKLiztHisU-MIoDtGgr_PfW6MN1lPIqPEkgGfanT5VlKFZx9zmd6k_7gaW_YBl9ukb1XIykM9zyM9OdEBuAMF2AmxdO4DqbkrYi3b-WznAxPv4yqsyubxoiscDiuepVPyLqGQ4od0Zh6dnyet7whjU6sHM3LlhIMfoek8ti00kSsjCzIfjUlixpw'
+        follow_redirects: safe
+        return_content: true
+      register: result
+
+    - name: print
+      ansible.builtin.debug:
+        var: result

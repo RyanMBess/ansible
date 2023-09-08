@@ -1,0 +1,60 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/token/v2/authenticate"
+    microsoft: 10.10.0.0
+  
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        method: POST
+        validate_certs: false
+        body:
+          username: admin
+          password: C1sco12345!
+        body_format: form-urlencoded
+        headers:
+          Content-Type: application/x-www-form-urlencoded        
+      register: login
+       
+    - name: store session data # storing tokens and cookies into variables for use later
+      ansible.builtin.set_fact:
+        cookies_string:  "{{ login.cookies_string  }}"
+        xsrf_token:  "{{  login.cookies['XSRF-TOKEN']  }}"
+        cookie:  "{{ login.cookies['stealthwatch.jwt']  }}"
+
+    - name: Update Bad Hosts Group
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/311/tags/50121'
+        method: PUT
+        validate_certs: false
+        body:
+          id: 50121
+          name: 'Bad Hosts'
+          location: OUTSIDE
+          ranges: "{{  microsoft  }}"
+            #- 2.2.2.3
+          # description: 'A sample of a threat feed'
+          # hostBaselines: false
+          # suppressExcludedServices: true
+          # inverseSuppression: false
+          # hostTrap: false
+          # sendToCta: false
+          domainId: 311 # minimum needed to update
+          #parentId: 0
+        body_format: json
+        headers:
+          Content-Type: application/json
+          X-XSRF-TOKEN: "{{  xsrf_token  }}"
+          Cookie: "{{ cookies_string  }}"
+        follow_redirects: safe
+      register: updated_result
+    
+    - name: print updated
+      ansible.builtin.debug:
+        var: updated_result
+

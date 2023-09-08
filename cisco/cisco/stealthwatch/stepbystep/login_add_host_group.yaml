@@ -1,0 +1,65 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+ 
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/token/v2/authenticate"
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        method: POST
+        validate_certs: false
+        body:
+          username: admin
+          password: C1sco12345!
+        body_format: form-urlencoded
+        headers:
+          Content-Type: application/x-www-form-urlencoded        
+      register: login
+    
+    - name: print login
+      ansible.builtin.debug:
+        var: login
+    
+    - name: store session data # storing tokens and cookies into variables for use later
+      ansible.builtin.set_fact:
+        cookies_string:  "{{ login.cookies_string  }}"
+        xsrf_token:  "{{  login.cookies['XSRF-TOKEN']  }}"
+        cookie:  "{{ login.cookies['stealthwatch.jwt']  }}"
+
+
+    - name:  create host group
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/311/tags/'
+        method: POST
+        validate_certs: false
+        body:
+          -
+            name: 'Bad Hosts9999999'
+            location: OUTSIDE
+            description: 'A sample of a threat feed'
+            ranges:
+              - 149.202.170.60
+              - 23.129.64.101
+              - 37.187.129.166
+              - 91.146.121.3
+            hostBaselines: false
+            suppressExcludedServices: true
+            inverseSuppression: false
+            hostTrap: false
+            sendToCta: false
+            parentId: 0            
+        body_format: json
+        headers:
+          Content-Type: application/json
+          X-XSRF-TOKEN: "{{  xsrf_token  }}"
+          Cookie: "{{ cookies_string  }}"
+        follow_redirects: safe
+      register: new_hostgroup
+
+    - name: print hostgroup
+      ansible.builtin.debug:
+        var: new_hostgroup

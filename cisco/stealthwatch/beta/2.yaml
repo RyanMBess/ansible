@@ -1,0 +1,20 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+  
+  tasks:
+    - set_fact:
+        VARS: {foo: bar, baz: biz}
+
+    - name: print type
+      ansible.builtin.debug:
+        var: VARS | type_debug
+
+    - set_fact:
+        AS_SHELL: "{{ VARS | items | map('join', '=') | join('\n') }}"
+
+    - name: print
+      ansible.builtin.debug:
+        var: AS_SHELL
+  

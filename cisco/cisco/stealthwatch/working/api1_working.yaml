@@ -1,0 +1,71 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false
+ 
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/token/v2/authenticate"
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        method: POST
+        validate_certs: false
+        body:
+          username: admin
+          password: C1sco12345!
+        body_format: form-urlencoded
+        headers:
+          Content-Type: application/x-www-form-urlencoded        
+      register: login
+    
+    - name: print login
+      ansible.builtin.debug:
+        var: login.cookies['XSRF-TOKEN']
+    
+    - name: save
+      ansible.builtin.set_fact:
+        xsrf: login.cookies[XSRF-TOKEN]
+
+    - name: token
+      ansible.builtin.debug:
+        var: login.cookies_string
+      
+    - name: data
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/sw-reporting/v1/tenants'
+        validate_certs: false
+        method: GET
+        headers:
+          Cookie:  "{{ login.cookies_string}}"
+        follow_redirects: safe
+        return_content: true
+      register: result
+
+    - name: create tag
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/301/tags/'
+        method: POST
+        validate_certs: false
+        body:
+          -
+            location: OUTSIDE
+            description: 'A sample of a threat feed'
+            ranges:
+              - 149.202.170.60
+              - 23.129.64.101
+              - 37.187.129.166
+              - 91.146.121.3
+            hostBaselines: false
+            suppressExcludedServices: true
+            inverseSuppression: false
+            hostTrap: false
+            sendToCta: false
+            parentId: 0
+        body_format: json
+        headers:
+          Cookie: "{{ xsrf  }}"
+          Content-Type: application/json
+        #follow_redirects: safe
+      register: result
