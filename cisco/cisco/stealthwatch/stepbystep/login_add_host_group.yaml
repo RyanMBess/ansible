@@ -44,7 +44,7 @@
         validate_certs: false
         body:
           -
-            name: 'Ryan Bad'
+            name: 'Ryan Bad11111111111111'
             location: OUTSIDE
             description: 'A sample of a threat feed'
             ranges:
