@@ -5,7 +5,8 @@
   vars:
     server: "https://10.10.20.60"
     endpoint: "/token/v2/authenticate"
-    microsoft: 10.10.0.0
+    microsoft: 
+      - 10.10.0.0
   vars_files:
     - /home/ryan/github/ansible/vars/creds.yaml
   
@@ -38,8 +39,7 @@
           id: 50121
           name: 'Bad Hosts'
           location: OUTSIDE
-          ranges:
-            - 2.2.2.3
+          ranges: "{{  microsoft  }}"
           # description: 'A sample of a threat feed'
           # hostBaselines: false
           # suppressExcludedServices: true
