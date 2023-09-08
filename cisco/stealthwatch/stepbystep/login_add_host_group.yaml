@@ -2,10 +2,12 @@
 - name: uri module demo
   hosts: localhost 
   gather_facts: false
- 
   vars:
     server: "https://10.10.20.60"
     endpoint: "/token/v2/authenticate"
+  vars_files:
+    - /home/ryan/github/ansible/creds.yaml
+  
   tasks:
     - name: login
       ansible.builtin.uri:

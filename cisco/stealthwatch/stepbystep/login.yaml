@@ -1,11 +1,12 @@
 ---
 - name: uri module demo
   hosts: localhost 
-  gather_facts: false
- 
+  gather_facts: false 
   vars:
     server: "https://10.10.20.60"
     endpoint: "/token/v2/authenticate"
+  vars_files:
+    - /home/ryan/github/ansible/creds.yaml
   tasks:
     - name: login
       ansible.builtin.uri:
@@ -13,8 +14,8 @@
         method: POST
         validate_certs: false
         body:
-          username: admin
-          password: C1sco12345!
+          username: "{{  sw_admin  }}"
+          password: "{{ sw_password  }}"
         body_format: form-urlencoded
         headers:
           Content-Type: application/x-www-form-urlencoded        
