@@ -7,7 +7,7 @@
     endpoint: "/token/v2/authenticate"
     microsoft: 10.10.0.0
   vars_files:
-    - /home/ryan/github/ansible/creds.yaml
+    - /home/ryan/github/ansible/vars/creds.yaml
   
   tasks:
     - name: login

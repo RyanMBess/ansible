@@ -6,7 +6,7 @@
     server: "https://10.10.20.60"
     endpoint: "/token/v2/authenticate"
   vars_files:
-    - /home/ryan/github/ansible/creds.yaml
+    - /home/ryan/github/ansible/vars/creds.yaml
   
   tasks:
     - name: login
