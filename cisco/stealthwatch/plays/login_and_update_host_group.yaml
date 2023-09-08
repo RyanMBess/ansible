@@ -11,6 +11,26 @@
     - /home/ryan/github/ansible/vars/creds.yaml
   
   tasks:
+
+  #----------------------------------------------------------------------------
+  # AWS IPs EDL
+  #----------------------------------------------------------------------------
+      
+    - name: Get Data from AWS
+      ansible.builtin.uri:
+        url: "https://ip-ranges.amazonaws.com/ip-ranges.json"
+        return_content: true
+      register: raw_data
+    
+    - name: Filter IPs
+      ansible.builtin.set_fact:
+        ipv4_range_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ip_prefix') | unique | flatten }}"
+        ipv6_range_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ipv6_prefix') | unique | flatten }}"       
+
+    - name: Store all AWS IPs into Variable
+      ansible.builtin.set_fact:
+        all_aws_ips: "{{  ipv4_range_list + ipv6_range_list  }}"
+
     - name: login
       ansible.builtin.uri:
         url: "{{ server }}{{ endpoint }}"
@@ -39,7 +59,7 @@
           id: 50121
           name: 'Bad Hosts'
           location: OUTSIDE
-          ranges: "{{  microsoft  }}"
+          ranges: "{{  all_aws_ips }}"
           # description: 'A sample of a threat feed'
           # hostBaselines: false
           # suppressExcludedServices: true
