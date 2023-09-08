@@ -1,0 +1,16 @@
+---
+  - hosts: localhost
+    connection: local
+    gather_facts: false
+    vars:
+      device:
+        ip_address: 10.10.200.4
+        username: xxxx
+        password: xxxxxx
+
+    tasks:
+      - name: Show IP
+        paloaltonetworks.panos.panos_op:
+          provider: "{{  device  }}"
+          cmd: 'show interface ethernet1/1'
+        register: interface

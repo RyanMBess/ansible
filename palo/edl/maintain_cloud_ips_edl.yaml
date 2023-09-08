@@ -1,0 +1,127 @@
+---
+  - hosts: localhost
+    connection: local
+    gather_facts: false
+
+    tasks:
+
+      - name: Get Date 
+        ansible.builtin.set_fact:
+        # https://docs.ansible.com/ansible/latest/collections/ansible/builtin/pipe_lookup.html
+          date: "{{ lookup('ansible.builtin.pipe', 'date') }}"
+
+      #----------------------------------------------------------------------------
+      # AWS IPs EDL
+      #----------------------------------------------------------------------------
+      
+      - name: Get Data from AWS
+        ansible.builtin.uri:
+          url: "https://ip-ranges.amazonaws.com/ip-ranges.json"
+          return_content: true
+        register: raw_data
+    
+      - name: Filter IPs
+        ansible.builtin.set_fact:
+          ipv4_range_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ip_prefix') | unique | flatten }}"
+          ipv6_range_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ipv6_prefix') | unique | flatten }}"       
+
+      - name: Store all AWS IPs into Variable
+        ansible.builtin.set_fact:
+          all_aws_ips: "{{  ipv4_range_list + ipv6_range_list  }}"
+
+      - name: Add AWS IP's to text file
+        ansible.builtin.copy:
+          content: "{% for item in all_aws_ips -%}{{ item }}\n{% endfor %}"
+          dest: /home/ryan/ansible/paloalto/edl/data/all_aws_ips.txt
+    
+      # - name: Insert Metadata into file
+      #   ansible.builtin.lineinfile:
+      #     path: /home/ryan/ansible/paloalto/edl/data/all_aws_ips.txt
+      #     insertbefore: BOF
+      #     line: |
+      #       "#https://docs.aws.amazon.com/vpc/latest/userguide/aws-ip-ranges.html"
+      #       "#https://ip-ranges.amazonaws.com/ip-ranges.json"
+      #       "#last updated:  {{  date  }}"
+
+      # - name: Move File to Webserver 
+      #   ansible.windows.win_copy:
+      #     src: /var/tmp/all_aws_ips.txt
+      #     dest: D:\EDL\Sites\CET\
+      #   delegate_to: "{{  edl_webserver  }}" # edl_webserver variable value populated in AAC template
+
+      #----------------------------------------------------------------------------
+      # Google IPs ED:
+      #----------------------------------------------------------------------------
+
+      - name: Get Data from Google
+        ansible.builtin.uri:
+          url: "https://www.gstatic.com/ipranges/goog.json"
+          return_content: true
+        register: raw_data
+  
+      - name: Filter IPs
+        ansible.builtin.set_fact:
+          ipv4_range_list: "{{ raw_data.json.prefixes|selectattr('ipv4Prefix', 'defined') | map(attribute='ipv4Prefix') | flatten }}"
+          ipv6_range_list: "{{ raw_data.json.prefixes|selectattr('ipv6Prefix', 'defined') | map(attribute='ipv6Prefix') | flatten }}"
+   
+
+      - name: Store all Google IPs into Variable
+        ansible.builtin.set_fact:
+          all_google_ips: "{{  ipv4_range_list + ipv6_range_list  }}"
+
+      - name:  Add Google IP's to text file
+        ansible.builtin.copy:
+          content: "{% for item in all_google_ips -%}{{ item }}\n{% endfor %}"
+          dest: /home/ryan/ansible/paloalto/edl/data/all_google_ips.txt
+   
+      # - name: Insert Metadata into file
+      #   ansible.builtin.lineinfile:
+      #     path: /home/ryan/ansible/edl/data/all_google_ips.txt
+      #     insertbefore: BOF
+      #     line: |
+      #       "#https://www.gstatic.com/ipranges/cloud.json"
+      #       "#last updated:  {{  date  }}"
+
+      # - name: Move File to Websever 
+      #   ansible.windows.win_copy:
+      #     src: /var/tmp/all_google_ips.txt
+      #     dest: D:\EDL\Sites\CET\
+      #   delegate_to: "{{  edl_webserver  }}" # edl_webserver variable value populated in AAC template-----------
+
+      #----------------------------------------------------------------------------
+      # Tenable IPs EDL
+      #----------------------------------------------------------------------------
+
+      - name: Get Data from Tenable
+        ansible.builtin.uri:
+          url: "https://docs.tenable.com/ip-ranges/data.json"
+          return_content: true
+        register: raw_data
+  
+      - name: Filter IPs
+        ansible.builtin.set_fact:
+          ipv4_range_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | map(attribute='ip_prefix') | flatten }}"
+          ipv6_range_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | map(attribute='ipv6_prefix') | flatten }}"   
+
+      - name: Store all Tenable IPs into Variable
+        ansible.builtin.set_fact:
+          all_tenable_ips: "{{  ipv4_range_list + ipv6_range_list  }}"
+
+      - name:  Add Tenable IP's to text file
+        ansible.builtin.copy:
+          content: "{% for item in all_tenable_ips -%}{{ item }}\n{% endfor %}"
+          dest: /home/ryan/ansible/paloalto/edl/data/all_tenable_ips.txt
+   
+      # - name: Insert Metadata into file
+      #   ansible.builtin.lineinfile:
+      #     path: /home/ryan/ansible/edl/data/all_tenable_ips.txt
+      #     insertbefore: BOF
+      #     line: |
+      #       "#https://docs.tenable.com/ip-ranges/data.json"
+      #       "#last updated:  {{  date  }}"
+
+      # - name: Move File to Websever 
+      #   ansible.windows.win_copy:
+      #     src: /var/tmp/all_tenable_ips.txt
+      #     dest: D:\EDL\Sites\CET\
+      #   delegate_to: "{{  edl_webserver  }}" # edl_webserver variable value populated in AAC template-----------

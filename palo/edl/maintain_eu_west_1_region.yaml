@@ -1,0 +1,63 @@
+# Needed for nanoporetech
+---  
+  - hosts: localhost
+    connection: local
+    gather_facts: false
+    vars:
+      device: # variable values for the below come from Credentials from AAC Template
+        ip_address: '{{ PANORAMA_HOST }}'
+        username: '{{ PANORAMA_USERNAME }}'
+        password: '{{ PANORAMA_PASSWORD}}'
+
+    tasks:
+      - name: get date
+        ansible.builtin.set_fact:
+          date: "{{ lookup('pipe', 'date +%Y-%m-%d@%H:%M:%S') }}"
+
+      - name: get_data
+        ansible.builtin.uri:
+          url: "https://ip-ranges.amazonaws.com/ip-ranges.json"
+          return_content: true
+        register: raw_data
+      
+      - name:  AWS EU West 1 Region
+        ansible.builtin.set_fact:
+          Amazon_EU_West_1_ipv4_list: "{{ raw_data.json.prefixes|selectattr('region', 'equalto', 'eu-west-1') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ip_prefix') | unique |
+          
+          
+           flatten }}"
+
+      - name: Amazon EU West Region
+      # https://paloaltonetworks.github.io/pan-os-ansible/modules/panos_region_module.html
+        paloaltonetworks.panos.panos_region:
+          provider: "{{  device  }}"
+          name: 'Amazon EU-West-1'
+          address: "{{  Amazon_EU_West_1_ipv4_list  }}"
+        notify:
+          - commit to panorama
+          - push to firewall
+    
+    
+    handlers:
+      - name: commit to panorama
+      # https://paloaltonetworks.github.io/pan-os-ansible/modules/panos_commit_firewall_module.html
+        paloaltonetworks.panos.panos_commit_panorama:
+          provider: "{{  device  }}"
+          admins: "{{  palo_admin  }}" # value coming from AAP
+          description: "Ansible Automated Deployment - Commit to Panorama"
+      
+      - name: push to firewall
+      # https://paloaltonetworks.github.io/pan-os-ansible/modules/panos_commit_push_module.html
+        paloaltonetworks.panos.panos_commit_push:
+          provider: "{{ device  }}"
+          style: "device group" 
+          name:  "{{  device_group  }}" # value coming from AAP
+          admins: "{{  palo_admin  }}" # value coming from AAP
+          description:  "Ansible Automated Deployment - Push to Firewall"
+
+
+      - name: Amazon EU West Region
+        paloaltonetworks.panos.panos_region:
+          provider: "{{  device  }}"
+          name: 'Amazon EU-West-1'
+          address: "{{  Amazon_EU_West_1_ipv4_list  }}"
