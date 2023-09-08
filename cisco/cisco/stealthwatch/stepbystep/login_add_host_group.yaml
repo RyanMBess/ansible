@@ -17,8 +17,10 @@
         method: POST
         validate_certs: false
         body:
-          username: "{{  sw_admin  }}"
-          password: "{{ sw_password  }}"
+          username: admin
+          password: C1sco12345!
+          #username: "{{  sw_admin  }}"
+          #password: "{{ sw_password  }}"
         body_format: form-urlencoded
         headers:
           Content-Type: application/x-www-form-urlencoded        
@@ -42,7 +44,7 @@
         validate_certs: false
         body:
           -
-            name: 'Bad Hosts9999999'
+            name: 'Ryan Bad'
             location: OUTSIDE
             description: 'A sample of a threat feed'
             ranges:

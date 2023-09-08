@@ -34,18 +34,18 @@
         validate_certs: false
         body:
           id: 50121
-          name: 'Bad Hosts'
+          name: 'Sample Threat Feed'
           location: OUTSIDE
           ranges:
-            - 2.2.2.3
-          # description: 'A sample of a threat feed'
-          # hostBaselines: false
-          # suppressExcludedServices: true
-          # inverseSuppression: false
-          # hostTrap: false
-          # sendToCta: false
-          domainId: 311 # minimum needed to update
-          #parentId: 0
+              - 149.202.170.60
+          description: 'A sample of a threat feed'
+          hostBaselines: false
+          suppressExcludedServices: true
+          inverseSuppression: false
+          hostTrap: false
+          sendToCta: false
+          domainId: 311
+          parentId: 0
         body_format: json
         headers:
           Content-Type: application/json
@@ -57,4 +57,3 @@
     - name: print updated
       ansible.builtin.debug:
         var: updated_result
-
