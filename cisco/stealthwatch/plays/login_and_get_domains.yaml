@@ -36,8 +36,13 @@
       ansible.builtin.uri:
         url: 'https://10.10.20.60/sw-reporting/v1/tenants'
         method: GET
+        return_content: true
         validate_certs: false
         headers:
           Cookie: "{{  cookies_string  }}"
         follow_redirects: safe
-      register: result
+      register: domains
+    
+    - name: print
+      ansible.builtin.debug:
+        var: domains
