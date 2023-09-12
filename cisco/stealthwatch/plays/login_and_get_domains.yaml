@@ -31,3 +31,13 @@
         cookies_string:  "{{ login.cookies_string  }}"
         xsrf_token:  "{{  login.cookies['XSRF-TOKEN']  }}"
         cookie:  "{{ login.cookies['stealthwatch.jwt']  }}"
+
+    - name: 'https://10.10.20.60/sw-reporting/v1/tenants'
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/sw-reporting/v1/tenants'
+        method: GET
+        validate_certs: false
+        headers:
+          Cookie: "{{  cookies_string  }}"
+        follow_redirects: safe
+      register: result
