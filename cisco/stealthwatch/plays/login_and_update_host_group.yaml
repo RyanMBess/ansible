@@ -22,14 +22,25 @@
         return_content: true
       register: raw_data
     
-    - name: Filter IPs
+    - name: Store V4 and V6 IPs
       ansible.builtin.set_fact:
-        ipv4_range_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ip_prefix') | unique | flatten }}"
-        ipv6_range_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ipv6_prefix') | unique | flatten }}"       
+        all_aws_ipv4_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ip_prefix') | unique | flatten }}"
+        all_aws_ipv6_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | selectattr('service', 'equalto', 'AMAZON') | map(attribute='ipv6_prefix') | unique | flatten }}"       
 
     - name: Store all AWS IPs into Variable
       ansible.builtin.set_fact:
-        all_aws_ips: "{{  ipv4_range_list + ipv6_range_list  }}"
+        all_aws_ips: "{{  all_aws_ipv4_list + all_aws_ipv6_list  }}"
+
+     - name: Store V4 and V6 AWS US GOV IPs
+      ansible.builtin.set_fact:
+        all_aws_us_gov_ipv4_list: "{{ raw_data.json.prefixes|selectattr('ip_prefix', 'defined') | selectattr('region', 'match', 'us-gov*') | map(attribute='ip_prefix') | unique | flatten }}"
+        all_aws_us_gov_ipv6_list: "{{ raw_data.json.ipv6_prefixes|selectattr('ipv6_prefix', 'defined') | selectattr('region', 'match', 'us-gov*') | map(attribute='ipv6_prefix') | unique | flatten }}"       
+
+    - name: Store all AWS IPs into Variable
+      ansible.builtin.set_fact:
+        all_aws_us_gov_ips: "{{  all_aws_us_gov_ipv4_list + all_aws_us_gov_ipv6_list  }}"
+
+
 
     - name: login
       ansible.builtin.uri:
@@ -52,7 +63,7 @@
 
     - name: Update AWS Hosts Group
       ansible.builtin.uri:
-        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/311/tags/50121'
+        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/311/tags/50122'
         method: PUT
         validate_certs: false
         body:
