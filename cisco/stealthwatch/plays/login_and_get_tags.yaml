@@ -1,0 +1,49 @@
+---
+- name: uri module demo
+  hosts: localhost 
+  gather_facts: false 
+  vars:
+    server: "https://10.10.20.60"
+    endpoint: "/token/v2/authenticate"
+    tenant_id:  "311"
+  vars_files:
+    - /home/ryan/github/ansible/vars/creds.yaml
+  tasks:
+    - name: login
+      ansible.builtin.uri:
+        url: "{{ server }}{{ endpoint }}"
+        method: POST
+        validate_certs: false
+        body:
+          username: "{{  sw_admin  }}"
+          password: "{{ sw_password  }}"
+        body_format: form-urlencoded
+        headers:
+          Accept:  application/json
+          Content-Type: application/x-www-form-urlencoded        
+      register: login
+    
+    - name: print login
+      ansible.builtin.debug:
+        var: login
+    
+    - name: store session data # storing tokens and cookies into variables for use later
+      ansible.builtin.set_fact:
+        cookies_string:  "{{ login.cookies_string  }}"
+        xsrf_token:  "{{  login.cookies['XSRF-TOKEN']  }}"
+        cookie:  "{{ login.cookies['stealthwatch.jwt']  }}"
+
+    - name: get tags
+      ansible.builtin.uri:
+        url: 'https://10.10.20.60/smc-configuration/rest/v1/tenants/{{tenant_id}}/tags/'
+        method: GET
+        validate_certs: false
+        headers:
+          Content_Type:  application/json
+          Cookie: "{{  cookies_string  }}"
+        follow_redirects: safe
+      register: tags
+    
+    - name: print
+      ansible.builtin.debug:
+        var: tags
