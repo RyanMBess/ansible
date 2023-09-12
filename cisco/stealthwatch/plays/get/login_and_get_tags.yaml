@@ -1,5 +1,5 @@
 ---
-- name: uri module demo
+- name: Authenticate and get tags
   hosts: localhost 
   gather_facts: false 
   vars:
