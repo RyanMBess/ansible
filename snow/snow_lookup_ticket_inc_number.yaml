@@ -1,0 +1,25 @@
+---
+- name: Get Snow Ticket by INC Number
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars: 
+    snow_host: https://xxxxxxxxxxxxx.xxxxxxxxxxxxxxxx.xxx
+    snow_username: XXXXXXXXXXXXX
+    snow_password: XXXXXXXXXXXXX
+
+  tasks:
+  # Gets all data out of ServiceNow
+    - name: Search SNOW Incidents by INC Number
+    # https://github.com/ansible-collections/servicenow.itsm/blob/main/docs/servicenow.itsm.incident_info_module.rst
+      servicenow.itsm.incident_info:
+        instance: 
+          host: "{{ snow_host}}"
+          username: "{{ snow_username}}"
+          password:  "{{ snow_password }}" 
+        number:  xxxxxxxxxxxxxx
+      register: ticket
+
+    - name: print
+      ansible.builtin.debug:
+        var: ticket
