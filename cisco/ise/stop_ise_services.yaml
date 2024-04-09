@@ -1,0 +1,28 @@
+---
+#ansible-galaxy collection install ansible.netcommon
+
+- name: Shutdown Cisco ISE instances gracefully
+  hosts: ise_nodes
+  gather_facts: no
+  connection: network_cli
+  vars:
+    ansible_network_os:  ios
+  vars_prompt:
+    - name:  ise_user
+      prompt:  "Enter username"
+      private: no
+    - name: ansible_password
+      prompt:  "Enter password"
+      private: yes
+    
+  tasks:
+    - name: Stop ISE application
+      ansible.netcommon.cli_command:
+        command: application stop ise
+      async: 300
+      poll: 10
+      register: ise_shutdown_result
+
+    - name: Display output
+      debug:
+        var: ise_shutdown_result
