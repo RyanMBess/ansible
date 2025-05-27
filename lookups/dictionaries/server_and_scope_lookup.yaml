@@ -1,30 +1,29 @@
 ---
 - name: Dictionary Lookups
-  gather_facts: false
   hosts: localhost
-  vars: 
+  gather_facts: false
+  vars:
     dhcp_servers:
       Location1:
         dhcp_server: dhcp1.domain.com
         scope: 192.168.1.0
       Location2:
-        dhcp_server: dhcp2.domin.com
+        dhcp_server: dhcp2.domain.com
         scope: 192.168.2.0
       Location3:
         dhcp_server: dhcp3.domain.com
         scope: 192.168.3.0
-    
-    location: 'Location1' # because the location is set to Location1, the set facts template belo will pull out and assign relevant data from the dictionary above.
-  tasks:
-    - name: Set Facts
-      ansible.builtin.set_fact:
-        location_dhcp_server:  "{{  item.value.dhcp_server  }}"
-        location_dhcp_scope:  " {{  item.value.scope  }}"
-      loop: "{{ lookup('dict', dhcp_servers) }}"
-      when: "location in item.key"
 
-    - name: Print Facts
+    location: 'Location1'  # Set this to the desired location
+
+  tasks:
+    - name: Set DHCP server and scope facts for selected location
+      ansible.builtin.set_fact:
+        location_dhcp_server: "{{ dhcp_servers[location].dhcp_server }}"
+        location_dhcp_scope: "{{ dhcp_servers[location].scope }}"
+
+    - name: Print DHCP server and scope
       ansible.builtin.debug:
-        msg:  
-          - "DHCP Server is: {{ location_dhcp_server  }}"
+        msg:
+          - "DHCP Server is: {{ location_dhcp_server }}"
           - "DHCP Scope is: {{ location_dhcp_scope }}"
